@@ -26,5 +26,5 @@ data.mc = data.mc %>%
   # Joins the list structure we created based on the month_group variable
   mutate(hour.temp = hour + 1) %>%
   # To match up the indices
-  mutate(param.t0 = price.list[[1]][[hour.temp]][2]) 
-  # I've stored the parameters in a list of list because it organizes easily. However, I'm having trouble making the code actually work. This step itself is not informative I'm just trying to figure out how to use data (i.e., the other columns in the data.frame) to select particular values from the list in the variable price.list (str = list).
+  rowwise() %>%
+  mutate(param.t0 = price.list[[hour.temp]][2]) 
