@@ -5,6 +5,8 @@ options(digits=15)
 options(scipen=999)
 require(dplyr)
 
+n=100
+# Sample size
 path.processed = "C:/Users/ablohm/Documents/earth_network/data/processed/"
 # Change to the folder with the list_logrnml.rds dafile 
 setwd(path.processed)
