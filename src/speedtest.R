@@ -15,8 +15,11 @@ dist.price.v2 = readRDS(file="logrnml_price.rds")
 dist.load.v2 = readRDS(file="logrnml_load.rds")
 # Model 1 uses the first set of inputs; model 2 the second set.
 
+time.taken = data.frame(model.1 = c(0,0,0),
+                        model.2 = c(0,0,0))
+
 start.time = Sys.time()
-n= 100
+n= 1000000
 # Sample size
 data.mc = data.frame(
   month_group = round(runif(n, min= 0.5, max= 2.5)),
@@ -75,9 +78,7 @@ data.mc = data.mc %>%
 # This first approach uses a structured list to store information on the parameters of the load and price distribution parameters for additional later sampling operations. 
 
 end.time = Sys.time()
-time.taken = data.frame(model.1 = 0,
-                        model.2 = 0)
-time.taken[1, 1] = end.time - start.time
+time.taken[3, 1] = end.time - start.time
 
 # Second model
 dist.price.v2 = dist.price.v2 %>%
@@ -85,7 +86,7 @@ dist.price.v2 = dist.price.v2 %>%
 dist.load.v2 = dist.load.v2 %>%
   select(., month_group, hour, mu.lb.load, mu.ub.load, sigma.lb.load, sigma.ub.load)
 
-start.time = Sys.time()
+start.time.m2 = Sys.time()
 n= 100
 data.mc = data.frame(
   month_group = round(runif(n, min= 0.5, max= 2.5)),
@@ -157,12 +158,9 @@ data.mc = data.mc %>%
   mutate(load.avg = mean(load.list[1:duration])) %>%
   mutate(load.end = load.list[duration + 1]) %>%
   ungroup() %>%
-  select(., -(load.t1:load.t4)) %>%
+  select(., -(load.t1:load.t4)) 
   
-end.time = Sys.time()
-time.taken = end.time - start.time
-time.taken
-    # dist.price = dist.price %>%
-    #  select(., month_group, hour, mu.lb.price, mu.ub.price, sigma.lb.price, sigma.ub.price) %>%
-    #  mutate(data = list(c(mu.lb.price, mu.ub.price, sigma.lb.price, sigma.ub.price)))
-    
+end.time.m2 = Sys.time()
+time.taken[3, 2] = end.time.m2 - start.time.m2
+
+View(time.taken)
