@@ -5,25 +5,23 @@ options(digits=15)
 options(scipen=999)
 require(dplyr)
 
-n=100
-# Sample size
 path.processed = "C:/Users/ablohm/Documents/earth_network/data/processed/"
 # Change to the folder with the list_logrnml.rds dafile 
 setwd(path.processed)
 
 dist.price = readRDS(file = "list_logrnml_price.rds")
 dist.load = readRDS(file = "list_logrnml_load.rds")
-
-data.mc = data.frame(
-  month_group = round(runif(n, min=0.5, max=2.5)),
-  hour = round(runif(n, min=14.5, max=22.5)),
-  duration = round(runif(n, min=-0.5, max= 4.5))) 
+dist.price.v2 = readRDS(file="logrnml_price.rds")
+dist.load.v2 = readRDS(file="logrnml_load.rds")
+# Model 1 uses the first set of inputs; model 2 the second set.
 
 start.time = Sys.time()
+n= 100
+# Sample size
 data.mc = data.frame(
-  month_group = round(runif(n, min=0.5, max=2.5)),
-  hour = round(runif(n, min=14.5, max=22.5)),
-  duration = round(runif(n, min=-0.5, max= 4.5))) 
+  month_group = round(runif(n, min= 0.5, max= 2.5)),
+  hour = round(runif(n, min= 14.5, max= 22.5)),
+  duration = round(runif(n, min= -0.5, max= 4.5))) 
 
 data.mc = data.mc %>%
   left_join(dist.price, by = "month_group") %>%
@@ -74,16 +72,18 @@ data.mc = data.mc %>%
   mutate(load.end = load.t.list[duration + 1]) %>%
   select(., month_group, hour, hour.temp, duration, price.list, price.t.list, price.avg, price.t0, price.end,
          load.list, load.t.list, load.avg, load.t0, load.end)
+# This first approach uses a structured list to store information on the parameters of the load and price distribution parameters for additional later sampling operations. 
 
 end.time = Sys.time()
-time.taken = end.time - start.time
-time.taken
+time.taken = data.frame(model.1 = 0,
+                        model.2 = 0)
+time.taken[1, 1] = end.time - start.time
 
 start.time = Sys.time()
 data.mc = data.frame(
-  month_group = round(runif(n, min=0.5, max=2.5)),
-  hour = round(runif(n, min=14.5, max=22.5)),
-  duration = round(runif(n, min=-0.5, max= 4.5))) 
+  month_group = round(runif(n, min= 0.5, max= 2.5)),
+  hour = round(runif(n, min= 14.5, max= 22.5)),
+  duration = round(runif(n, min= -0.5, max= 4.5))) 
 
 data.mc = data.mc %>%
   mutate(hour.end = hour + duration) %>% 
