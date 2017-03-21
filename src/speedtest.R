@@ -79,39 +79,85 @@ time.taken = data.frame(model.1 = 0,
                         model.2 = 0)
 time.taken[1, 1] = end.time - start.time
 
+# Second model
+dist.price.v2 = dist.price.v2 %>%
+  select(., month_group, hour, mu.lb.price, mu.ub.price, sigma.lb.price, sigma.ub.price)
+dist.load.v2 = dist.load.v2 %>%
+  select(., month_group, hour, mu.lb.load, mu.ub.load, sigma.lb.load, sigma.ub.load)
+
 start.time = Sys.time()
+n= 100
 data.mc = data.frame(
   month_group = round(runif(n, min= 0.5, max= 2.5)),
   hour = round(runif(n, min= 14.5, max= 22.5)),
   duration = round(runif(n, min= -0.5, max= 4.5))) 
 
 data.mc = data.mc %>%
-  mutate(hour.end = hour + duration) %>% 
-  mutate(hour.end = ifelse(hour.end >= 24, hour.end - 24, hour.end)) %>%
-  mutate(hour.b = hour) %>%
-  mutate(price.list = list(c(price.t0, price.t1, price.t2, price.t3))) %>%
-  mutate(price.avg = mean(price.list[1:duration])) %>%  
-  left_join(dist.price, by = c("month_group","hour")) %>%
+  mutate(hour.original = hour) %>%
+  # Price portion
+  left_join(dist.price.v2, by = c("month_group","hour")) %>%
   mutate(price.t0 = rlnorm(n, meanlog = runif(n, min = mu.lb.price, max = mu.ub.price), 
                            sdlog = runif(n, min = sigma.lb.price, max = sigma.ub.price))) %>%
-  select(., month_group, hour.b, hour, duration, hour.end, price.t0) %>%
-  mutate(hour = hour + 1) %>%
-  left_join(dist.price, by = c("month_group","hour")) %>%
+  select(., -(mu.lb.price:sigma.ub.price)) %>%
+  mutate(hour = ifelse(hour < 23, hour + 1, hour + 1 - 24)) %>%
+  left_join(dist.price.v2, by = c("month_group","hour")) %>%
   mutate(price.t1 = rlnorm(n, meanlog = runif(n, min = mu.lb.price, max = mu.ub.price), 
                            sdlog = runif(n, min = sigma.lb.price, max = sigma.ub.price))) %>%
-  select(., month_group, hour.b, hour, duration, hour.end, price.t0, price.t1) %>%
-  mutate(hour = hour + 1) %>%
-  mutate(hour = ifelse(hour>=24,hour-24, hour)) %>%
-  left_join(dist.price, by = c("month_group","hour")) %>%
+  select(., -(mu.lb.price:sigma.ub.price)) %>%
+  mutate(hour = ifelse(hour < 23, hour + 1, hour + 1 - 24)) %>%
+  left_join(dist.price.v2, by = c("month_group","hour")) %>%
   mutate(price.t2 = rlnorm(n, meanlog = runif(n, min = mu.lb.price, max = mu.ub.price), 
                            sdlog = runif(n, min = sigma.lb.price, max = sigma.ub.price))) %>%
-  select(., month_group, hour.b, hour, duration, hour.end, price.t0, price.t1, price.t2) %>%
-  mutate(hour = hour + 1) %>%
-  mutate(hour = ifelse(hour >= 24, hour-24, hour)) %>%
-  left_join(dist.price, by = c("month_group","hour")) %>%
+  select(., -(mu.lb.price:sigma.ub.price)) %>%
+  mutate(hour = ifelse(hour < 23, hour + 1, hour + 1 - 24)) %>%
+  left_join(dist.price.v2, by = c("month_group","hour")) %>%
   mutate(price.t3 = rlnorm(n, meanlog = runif(n, min = mu.lb.price, max = mu.ub.price), 
                            sdlog = runif(n, min = sigma.lb.price, max = sigma.ub.price))) %>%
-  select(., month_group, hour.b, hour, duration, hour.end, price.t0, price.t1, price.t2, price.t3) %>%
+  select(., -(mu.lb.price:sigma.ub.price)) %>%
+  mutate(hour = ifelse(hour < 23, hour + 1, hour + 1 - 24)) %>%
+  left_join(dist.price.v2, by = c("month_group","hour")) %>%
+  mutate(price.t4 = rlnorm(n, meanlog = runif(n, min = mu.lb.price, max = mu.ub.price), 
+                           sdlog = runif(n, min = sigma.lb.price, max = sigma.ub.price))) %>%
+  select(., -(mu.lb.price:sigma.ub.price)) %>%
+  rowwise() %>%
+  mutate(price.list = list(c(price.t0, price.t1, price.t2, price.t3, price.t4))) %>%
+  mutate(price.avg = mean(price.list[1:duration])) %>%
+  mutate(price.end = price.list[duration + 1]) %>%
+  ungroup() %>%
+  # Cancels out the rowwise()
+  select(., -(price.t1:price.t4)) %>%
+  # Load portion
+  mutate(hour = hour.original) %>%
+  left_join(dist.load.v2, by = c("month_group","hour")) %>%
+  mutate(load.t0 = rlnorm(n, meanlog = runif(n, min = mu.lb.load, max = mu.ub.load), 
+                           sdlog = runif(n, min = sigma.lb.load, max = sigma.ub.load))) %>%
+  select(., -(mu.lb.load:sigma.ub.load)) %>%
+  mutate(hour = ifelse(hour < 23, hour + 1, hour + 1 - 24)) %>%
+  left_join(dist.load.v2, by = c("month_group","hour")) %>%
+  mutate(load.t1 = rlnorm(n, meanlog = runif(n, min = mu.lb.load, max = mu.ub.load), 
+                           sdlog = runif(n, min = sigma.lb.load, max = sigma.ub.load))) %>%
+  select(., -(mu.lb.load:sigma.ub.load)) %>%
+  mutate(hour = ifelse(hour < 23, hour + 1, hour + 1 - 24)) %>%
+  left_join(dist.load.v2, by = c("month_group","hour")) %>%
+  mutate(load.t2 = rlnorm(n, meanlog = runif(n, min = mu.lb.load, max = mu.ub.load), 
+                          sdlog = runif(n, min = sigma.lb.load, max = sigma.ub.load))) %>%
+  select(., -(mu.lb.load:sigma.ub.load)) %>%
+  mutate(hour = ifelse(hour < 23, hour + 1, hour + 1 - 24)) %>%
+  left_join(dist.load.v2, by = c("month_group","hour")) %>%
+  mutate(load.t3 = rlnorm(n, meanlog = runif(n, min = mu.lb.load, max = mu.ub.load), 
+                          sdlog = runif(n, min = sigma.lb.load, max = sigma.ub.load))) %>%
+  select(., -(mu.lb.load:sigma.ub.load)) %>%
+  mutate(hour = ifelse(hour < 23, hour + 1, hour + 1 - 24)) %>%
+  left_join(dist.load.v2, by = c("month_group","hour")) %>%
+  mutate(load.t4 = rlnorm(n, meanlog = runif(n, min = mu.lb.load, max = mu.ub.load), 
+                          sdlog = runif(n, min = sigma.lb.load, max = sigma.ub.load))) %>%
+  select(., -(mu.lb.load:sigma.ub.load)) %>%
+  rowwise() %>%
+  mutate(load.list = list(c(load.t0, load.t1, load.t2, load.t3, load.t4))) %>%
+  mutate(load.avg = mean(load.list[1:duration])) %>%
+  mutate(load.end = load.list[duration + 1]) %>%
+  ungroup() %>%
+  select(., -(load.t1:load.t4)) %>%
   
 end.time = Sys.time()
 time.taken = end.time - start.time
