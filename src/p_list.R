@@ -27,4 +27,20 @@ data.mc = data.mc %>%
   mutate(hour.temp = hour + 1) %>%
   # To match up the indices
   rowwise() %>%
-  mutate(param.t0 = price.list[[hour.temp]][2]) 
+  mutate(price.t0 = rlnorm(1, meanlog= runif(1, min=price.list[[hour.temp]][2], max=price.list[[hour.temp]][3]),
+                                 sdlog = runif(1, min=price.list[[hour.temp]][4], max=price.list[[hour.temp]][5]))) %>%
+  mutate(hour.temp = ifelse(hour.temp < 24, hour.temp + 1, hour.temp + 1 - 23)) %>%
+  mutate(price.t1 = rlnorm(1, meanlog= runif(1, min=price.list[[hour.temp]][2], max=price.list[[hour.temp]][3]),
+                           sdlog = runif(1, min=price.list[[hour.temp]][4], max=price.list[[hour.temp]][5])))  %>%
+  mutate(hour.temp = ifelse(hour.temp < 24, hour.temp + 1, hour.temp + 1 - 23)) %>%
+  mutate(price.t2 = rlnorm(1, meanlog= runif(1, min=price.list[[hour.temp]][2], max=price.list[[hour.temp]][3]),
+                           sdlog = runif(1, min=price.list[[hour.temp]][4], max=price.list[[hour.temp]][5]))) %>%
+  mutate(hour.temp = ifelse(hour.temp < 24, hour.temp + 1, hour.temp + 1 - 23)) %>%
+  mutate(price.t3 = rlnorm(1, meanlog= runif(1, min=price.list[[hour.temp]][2], max=price.list[[hour.temp]][3]),
+                           sdlog = runif(1, min=price.list[[hour.temp]][4], max=price.list[[hour.temp]][5]))) %>%
+  mutate(hour.temp = ifelse(hour.temp < 24, hour.temp + 1, hour.temp + 1 - 23)) %>%
+  mutate(price.t4 = rlnorm(1, meanlog= runif(1, min=price.list[[hour.temp]][2], max=price.list[[hour.temp]][3]),
+                           sdlog = runif(1, min=price.list[[hour.temp]][4], max=price.list[[hour.temp]][5]))) %>%
+  mutate(price.t.list = list(c(price.t0, price.t1, price.t2, price.t3, price.t4))) %>%
+  mutate(price.avg = mean(price.t.list[1:duration])) %>%
+  mutate(price.end = price.t.list[duration + 1])
