@@ -43,4 +43,6 @@ data.mc = data.mc %>%
                            sdlog = runif(1, min=price.list[[hour.temp]][4], max=price.list[[hour.temp]][5]))) %>%
   mutate(price.t.list = list(c(price.t0, price.t1, price.t2, price.t3, price.t4))) %>%
   mutate(price.avg = mean(price.t.list[1:duration])) %>%
-  mutate(price.end = price.t.list[duration + 1])
+  mutate(price.end = price.t.list[duration + 1]) %>%
+  select(., month_group, hour, duration, price.list, price.t.list, price.avg, price.t0, price.end)
+  
