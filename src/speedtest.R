@@ -9,17 +9,20 @@ path.processed = "C:/Users/ablohm/Documents/earth_network/data/processed/"
 # Change to the folder with the list_logrnml.rds dafile 
 setwd(path.processed)
 
+dist.price.v2 = readRDS(file = "logrnml_price.rds")
+dist.load.v2 = readRDS(file = "logrnml_load.rds")
 dist.price = readRDS(file = "list_logrnml_price.rds")
 dist.load = readRDS(file = "list_logrnml_load.rds")
 dist.price.v2 = readRDS(file="logrnml_price.rds")
 dist.load.v2 = readRDS(file="logrnml_load.rds")
 # Model 1 uses the first set of inputs; model 2 the second set.
 
-time.taken = data.frame(model.1 = c(0,0,0),
+time.taken = data.frame(n = c(1000, 5000000, 10000000),
+                        model.1 = c(0,0,0),
                         model.2 = c(0,0,0))
+n= 1000000
 
 start.time = Sys.time()
-n= 1000000
 # Sample size
 data.mc = data.frame(
   month_group = round(runif(n, min= 0.5, max= 2.5)),
@@ -78,7 +81,7 @@ data.mc = data.mc %>%
 # This first approach uses a structured list to store information on the parameters of the load and price distribution parameters for additional later sampling operations. 
 
 end.time = Sys.time()
-time.taken[3, 1] = end.time - start.time
+time.taken[2, 2] = difftime(end.time, start.time, units= "secs")
 
 # Second model
 dist.price.v2 = dist.price.v2 %>%
@@ -87,7 +90,6 @@ dist.load.v2 = dist.load.v2 %>%
   select(., month_group, hour, mu.lb.load, mu.ub.load, sigma.lb.load, sigma.ub.load)
 
 start.time.m2 = Sys.time()
-n= 100
 data.mc = data.frame(
   month_group = round(runif(n, min= 0.5, max= 2.5)),
   hour = round(runif(n, min= 14.5, max= 22.5)),
@@ -161,6 +163,6 @@ data.mc = data.mc %>%
   select(., -(load.t1:load.t4)) 
   
 end.time.m2 = Sys.time()
-time.taken[3, 2] = end.time.m2 - start.time.m2
+time.taken[1, 3] = difftime(end.time.m2, start.time.m2, units = "secs")
 
 View(time.taken)
