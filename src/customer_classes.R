@@ -1,10 +1,14 @@
 install.packages("dplyr")
+install.packages("devtools")
+devtools::install_github("hadley/multidplyr")
+# Multidplyr is not available on CRAN
 
 rm(list=ls())
 options(digits=15)
 options(scipen=999)
 
 require(dplyr)
+require(multidplyr)
 
 path.processed = "C:/Users/ablohm/Documents/coding_questions/data/"
 path.results = "C:/Users/ablohm/Documents/coding_questions/data/"
